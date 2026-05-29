@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>ŞƏHƏR NƏBZİ – BAKI</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        :root { 
+            --bg: #0d1117; 
+            --panel: #161b22; 
+            --accent: #00d4ff; 
+            --border: #30363d; 
+        }
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            color: #c9d1d9; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden;
+        }
+        #header { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px 20px; 
+            background: var(--panel); 
+            border-bottom: 2px solid var(--accent); 
+            font-weight: bold; 
+            align-items: center; 
+        }
+        #stats { 
+            display: flex; 
+            justify-content: space-around; 
+            background: var(--panel); 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border); 
+            font-size: 14px; 
+        }
+        #main { 
+            display: flex; 
+            flex: 1; 
+            overflow: hidden; 
+        }
+        #left-bar { 
+            width: 350px; 
+            background: var(--panel); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            border-right: 1px solid var(--border); 
+        }
+        #map { 
+            flex: 1; 
+            background: #000; 
+        }
+        #right-bar { 
+            width: 350px; 
+            background: var(--panel); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            border-left: 1px solid var(--border); 
+        }
+        #chat-box { 
+            flex: 1; 
+            background: var(--bg); 
+            border: 1px solid var(--border); 
+            padding: 10px; 
+            overflow-y: auto; 
+            border-radius: 5px; 
+            margin-bottom: 10px; 
+        }
+        textarea, input, button { 
+            background: var(--bg); 
+            border: 1px solid var(--border); 
+            color: white; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        button { 
+            background: var(--accent); 
+            color: black; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border: none; 
+        }
+        .tabs { 
+            display: flex; 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid var(--border); 
+        }
+        .tab { 
+            flex: 1; 
+            text-align: center; 
+            padding: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: bold; 
+            color: #8b949e;
+        }
+        .tab.active { 
+            color: var(--accent); 
+            border-bottom: 2px solid var(--accent); 
+        }
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+        .msg { 
+            margin-bottom: 10px; 
+            padding: 10px; 
+            border-radius: 5px; 
+            font-size: 13px; 
+            line-height: 1.4; 
+        }
+        .agent { 
+            background: #1f2937; 
+            color: #fff; 
+            border-left: 3px solid var(--accent); 
+        }
+        .user { 
+            background: #238636; 
+            color: white; 
+            text-align: right; 
+        }
+        .suggested-btn { 
+            background: #21262d; 
+            color: #58a6ff; 
+            text-align: left; 
+            padding: 8px; 
+            margin-bottom: 5px; 
+            font-size: 12px; 
+            border: 1px solid var(--border); 
+            border-radius: 4px; 
+            width: 100%; 
+            cursor: pointer; 
+        }
+        .suggested-btn:hover { 
+            background: #30363d; 
+        }
+        .complaint-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .complaint-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .lang-btn {
+            background: #21262d;
+            color: white;
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .lang-btn.active {
+            background: var(--accent);
+            color: black;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div style="color: var(--accent); font-size: 18px; font-weight: bold;">● <span data-key="title">ŞƏHƏR NƏBZİ – BAKI</span></div>
+        <div style="font-size:12px; opacity:0.6;">SDG 11 · <span data-key="subtitle">Ağıllı Şəhər Platforması</span></div>
+        <div style="display: flex; gap: 5px; align-items: center;">
+            <div style="border: 1px solid #238636; color: #238636; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 10px;">• <span data-key="live">CANLI</span></div>
+            <button id="btn-az" class="lang-btn active" onclick="setLanguage('az')">AZ</button>
+            <button id="btn-en" class="lang-btn" onclick="setLanguage('en')">EN</button>
+        </div>
+    </div>
+    <div id="stats">
+        <div id="stat-total">📋 ÜMUMİ: <b>8</b></div>
+        <div id="stat-open" style="color:#ff6b6b">🔴 AÇIQ: <b>6</b></div>
+        <div id="stat-progress" style="color:#ffa502">🔶 İCRADA: <b>1</b></div>
+        <div id="stat-solved" style="color:#2ecc71">✅ HƏLL EDİLDİ: <b>1</b></div>
+        <div id="stat-critical" style="color:#f39c12">🚨 KRİTİK (P5): <b>3</b></div>
+    </div>
+    <div id="main">
+        <div id="left-bar">
+            <div class="tabs">
+                <div id="tab-form" class="tab active" onclick="switchTab('form')"><span data-key="tab_complaint">+ ŞİKAYƏT</span></div>
+                <div id="tab-list" class="tab" onclick="switchTab('list')"><span data-key="tab_list">📋 SİYAHI</span></div>
+            </div>
+            
+            <div id="content-form" class="tab-content active">
+                <label style="font-size:11px; opacity:0.6; margin-bottom:5px;" data-key="label_desc">PROBLEMİ TƏSVİR EDİN</label>
+                <textarea id="msgInput" placeholder="Nümunə: Nizami küçəsinin 45-ci evi qarşısında böyük çala var..."></textarea>
+                
+                <label style="font-size:11px; opacity:0.6; margin-bottom:5px;" data-key="label_coords">KOORDİNATLAR (XƏRİTƏDƏN SEÇİN)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="lat" placeholder="40.3989" readonly>
+                    <input type="text" id="lng" placeholder="49.8745" readonly>
+                </div>
+                <button onclick="sendComplaint()" data-key="btn_send">GÖNDƏR VƏ ANALİZ ET</button>
+            </div>
+
+            <div id="content-list" class="tab-content">
+                <label style="font-size:11px; opacity:0.6; margin-bottom:8px;" data-key="label_active">SİSTEMDƏKİ AKTİV ŞİKAYƏTLƏR</label>
+                <div id="complaints-list-container" style="flex:1; overflow-y:auto; padding-right:2px;">
+                    <div style="text-align:center; padding:20px; opacity:0.5;">Yüklənir...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div id="right-bar">
+            <h4 style="color:var(--accent); margin-top:0; display:flex; align-items:center; gap:5px; font-size: 14px;">🤖 <span data-key="agent_title">ANALİTİKA AGENTİ</span></h4>
+            <div id="chat-box">
+                <div class="msg agent" id="welcome-msg">Salam! Mən Bakı şəhərinin ağıllı analitika agentiyəm. Şəhər problemləri haqqında istənilən sual verə bilərsiniz.</div>
+            </div>
+            <div id="suggestions">
+                <button id="sug-1" class="suggested-btn" onclick="askSuggested(this.innerText)">📊 Bu həftə ən çox hansı problem var?</button>
+                <button id="sug-2" class="suggested-btn" onclick="askSuggested(this.innerText)">🚨 Ən kritik şikayətlər hansılardır?</button>
+                <button id="sug-3" class="suggested-btn" onclick="askSuggested(this.innerText)">🏢 Hansı şöbə ən çox şikayət alır?</button>
+            </div>
+            <input type="text" id="chatInput" placeholder="Sual yazın və Enter edin..." style="margin-top:10px;" onkeypress="if(event.key==='Enter') sendChat(null)">
+        </div>
+    </div>
+
+    <script>
+        var currentLang = 'az';
+
+        // LOKASİYA VƏ DATA TƏRCÜMƏ SİSTEMİ (MAPPING)
+        var dataTranslations = {
+            "Nizami küçəsindəki çalalar çox böyüyüb, maşınlar zədə alır": "Potholes on Nizami Street have grown significantly, damaging vehicles",
+            "28 May metrosunun yanındakı zibil qutuları 3 gündür boşaldılmayıb": "Garbage bins near 28 May metro station have not been emptied for 3 days",
+            "İçəri Şəhər parkındakı fənərlər yanmır, gecə çox qaranlıqdır": "Streetlights in Icherisheher park are not working, it is very dark at night",
+            "Yasamal parkında su borusu partlayıb, su küçəyə axır": "Water pipe burst in Yasamal park, water is flooding the street",
+            "Nərimanov rayonunda qaz kəsildi 2 saatdır": "Gas supply cut off in Narimanov district for 2 hours",
+            "Biləcəri qovşağında tıxac əmələ gətirən yol işarəsi yıxılıb": "A fallen traffic sign is causing a major traffic jam at Bilajari junction",
+            "Xətai prospektindəki ağaclar budanmayıb, elektrik xətlərini əhatə edib": "Trees on Khatai Avenue are unpruned and tangling with power lines",
+            "Sabunçu qəsəbəsində kanalizasiya daşıb, piyada yolu keçilməzdir": "Sewage overflow in Sabunchu village makes the pedestrian walkway impassable",
+            // Kateqoriyalar
+            "Yol": "Roads", "Sanitariya": "Sanitation", "İşıqlandırma": "Lighting", "Su Təchizatı": "Water Supply",
+            "Qaz": "Gas", "Yaşıllaşdırma": "Greenery", "Kanalizasiya": "Sewage", "Digər": "Other",
+            // Qurumlar
+            "Yol Xidməti": "Road Service", "Kommunal Xidmət": "Municipal Utilities", "Elektrik Xidməti": "Power Grid Service",
+            "Azərsu": "Azersu Water Co.", "Azərqaz": "Azerigaz Co.", "Yaşıllaşdırma İdarəsi": "Greenery Department", "Ümumi Şöbə": "General Dept"
+        };
+
+        var languages = {
+            az: {
+                title: "ŞƏHƏR NƏBZİ – BAKI", subtitle: "Ağıllı Şəhər Platforması", live: "CANLI",
+                tab_complaint: "+ ŞİKAYƏT", tab_list: "📋 SİYAHI",
+                label_desc: "PROBLEMİ TƏSVİR EDİN", label_coords: "KOORDİNATLAR (XƏRİTƏDƏN SEÇİN)",
+                btn_send: "GÖNDƏR VƏ ANALİZ ET", label_active: "SİSTEMDƏKİ AKTİV ŞİKAYƏTLƏR",
+                agent_title: "ANALİTİKA AGENTİ",
+                placeholder_input: "Sual yazın və Enter edin...",
+                placeholder_text: "Nümunə: Nizami küçəsinin 45-ci evi qarşısında böyük çala var...",
+                welcome: "Salam! Mən Bakı şəhərinin ağıllı analitika agentiyəm. Şəhər problemləri haqqında istənilən sual verə bilərsiniz.",
+                sug1: "📊 Bu həftə ən çox hansı problem var?",
+                sug2: "🚨 Ən kritik şikayətlər hansılardır?",
+                sug3: "🏢 Hansı şöbə ən çox şikayət alır?",
+                alert_fields: "Mətni daxil edin və xəritə üzərindən mütləq bir nöqtə seçin!",
+                alert_success: "✅ Şikayət uğurla qeydə alındı!", error_chat: "❌ Backend ilə əlaqə qurulmadı."
+            },
+            en: {
+                title: "CITY PULSE – BAKU", subtitle: "Smart City Platform", live: "LIVE",
+                tab_complaint: "+ COMPLAINT", tab_list: "📋 LIST",
+                label_desc: "DESCRIBE THE PROBLEM", label_coords: "COORDINATES (SELECT FROM MAP)",
+                btn_send: "SEND AND ANALYZE", label_active: "ACTIVE COMPLAINTS IN SYSTEM",
+                agent_title: "ANALYTICS AGENT",
+                placeholder_input: "Ask a question and press Enter...",
+                placeholder_text: "Example: There is a large pothole in front of 45 Nizami Street...",
+                welcome: "Hello! I am Baku's smart city analytics agent. You can ask me any questions about city infrastructure and problems.",
+                sug1: "📊 What is the most common issue this week?",
+                sug2: "🚨 What are the most critical complaints?",
+                sug3: "🏢 Which department receives the most complaints?",
+                alert_fields: "Please enter a description and select a point on the map!",
+                alert_success: "✅ Complaint registered successfully!", error_chat: "❌ Connection to backend failed."
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('btn-az').classList.remove('active');
+            document.getElementById('btn-en').classList.remove('active');
+            document.getElementById('btn-' + lang).classList.add('active');
+
+            var dict = languages[lang];
+            document.querySelectorAll('[data-key]').forEach(function(el) {
+                var key = el.getAttribute('data-key');
+                if(dict[key]) el.innerText = dict[key];
+            });
+
+            document.getElementById('chatInput').placeholder = dict.placeholder_input;
+            document.getElementById('msgInput').placeholder = dict.placeholder_text;
+            document.getElementById('welcome-msg').innerText = dict.welcome;
+            document.getElementById('sug-1').innerText = dict.sug1;
+            document.getElementById('sug-2').innerText = dict.sug2;
+            document.getElementById('sug-3').innerText = dict.sug3;
+
+            updateStatTexts(lang);
+            loadMarkers(); // Xəritədəki popup-ları da yeniləyirik
+            if(document.getElementById('tab-list').classList.contains('active')) renderList();
+        }
+
+        function translateText(txt) {
+            if(currentLang === 'en' && dataTranslations[txt]) {
+                return dataTranslations[txt];
+            }
+            return txt;
+        }
+
+        function updateStatTexts(lang) {
+            var totalNum = document.getElementById('stat-total').getElementsByTagName('b')[0].innerText;
+            var openNum = document.getElementById('stat-open').getElementsByTagName('b')[0].innerText;
+            var progNum = document.getElementById('stat-progress').getElementsByTagName('b')[0].innerText;
+            var solvNum = document.getElementById('stat-solved').getElementsByTagName('b')[0].innerText;
+            var critNum = document.getElementById('stat-critical').getElementsByTagName('b')[0].innerText;
+
+            if(lang === 'en') {
+                document.getElementById('stat-total').innerHTML = '📋 TOTAL: <b>' + totalNum + '</b>';
+                document.getElementById('stat-open').innerHTML = '🔴 OPEN: <b>' + openNum + '</b>';
+                document.getElementById('stat-progress').innerHTML = '🔶 IN PROGRESS: <b>' + progNum + '</b>';
+                document.getElementById('stat-solved').innerHTML = '✅ SOLVED: <b>' + solvNum + '</b>';
+                document.getElementById('stat-critical').innerHTML = '🚨 CRITICAL (P5): <b>' + critNum + '</b>';
+            } else {
+                document.getElementById('stat-total').innerHTML = '📋 ÜMUMİ: <b>' + totalNum + '</b>';
+                document.getElementById('stat-open').innerHTML = '🔴 AÇIQ: <b>' + openNum + '</b>';
+                document.getElementById('stat-progress').innerHTML = '🔶 İCRADA: <b>' + progNum + '</b>';
+                document.getElementById('stat-solved').innerHTML = '✅ HƏLL EDİLDİ: <b>' + solvNum + '</b>';
+                document.getElementById('stat-critical').innerHTML = '🚨 KRİTİK (P5): <b>' + critNum + '</b>';
+            }
+        }
+
+        var map = L.map('map').setView([40.3950, 49.8700], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        var colors = { 'açıq': '#ff6b6b', 'icrada': '#ffa502', 'həll edildi': '#2ecc71' };
+        var markersGroup = L.layerGroup().addTo(map);
+
+        function switchTab(tabName) {
+            document.getElementById('tab-form').classList.remove('active');
+            document.getElementById('tab-list').classList.remove('active');
+            document.getElementById('content-form').classList.remove('active');
+            document.getElementById('content-list').classList.remove('active');
+
+            if(tabName === 'form') {
+                document.getElementById('tab-form').classList.add('active');
+                document.getElementById('content-form').classList.add('active');
+            } else if(tabName === 'list') {
+                document.getElementById('tab-list').classList.add('active');
+                document.getElementById('content-list').classList.add('active');
+                renderList();
+            }
+        }
+
+        function renderList() {
+            var container = document.getElementById('complaints-list-container');
+            fetch('/api/complaints')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    container.innerHTML = "";
+                    if(data.complaints.length === 0) {
+                        container.innerHTML = "<div style='text-align:center; padding:20px; opacity:0.5;'>No data.</div>";
+                        return;
+                    }
+                    data.complaints.forEach(function(c) {
+                        var statusColor = colors[c.status] || '#ff6b6b';
+                        var priorityColor = c.priority === 5 ? '#ff4757' : (c.priority >= 4 ? '#ffa502' : '#54a0ff');
+                        
+                        // Dinamik Tərcümə süzgəci
+                        var categoryTranslated = translateText(c.category);
+                        var textTranslated = translateText(c.text);
+                        var deptTranslated = translateText(c.department || "Ümumi Şöbə");
+                        var displayStatus = currentLang === 'en' ? (c.status === 'açıq' ? 'OPEN' : (c.status === 'icrada' ? 'IN PROGRESS' : 'SOLVED')) : c.status;
+                        var pLevel = currentLang === 'en' ? 'Level' : 'Səviyyə';
+
+                        var htmlBlock = '<div class="complaint-item">' +
+                            '<div class="complaint-item-header">' +
+                                '<span style="color: var(--accent);">' + categoryTranslated + '</span>' +
+                                '<span class="badge" style="background: ' + statusColor + '; color: black; font-weight: bold;">' + displayStatus + '</span>' +
+                            '</div>' +
+                            '<div style="margin-bottom: 8px; line-height: 1.3; color:#e1e7ed;">' + textTranslated + '</div>' +
+                            '<div style="display:flex; justify-content:space-between; font-size:10px; opacity:0.6;">' +
+                                '<span>🏢 ' + deptTranslated + '</span>' +
+                                '<span style="color:' + priorityColor + '; font-weight:bold;">P' + c.priority + ' ' + pLevel + '</span>' +
+                            '</div>' +
+                        '</div>';
+                        
+                        container.innerHTML += htmlBlock;
+                    });
+                });
+        }
+
+        function loadMarkers() {
+            markersGroup.clearLayers();
+            fetch('/api/complaints')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    data.complaints.forEach(function(c) {
+                        var markerColor = colors[c.status] || '#ff6b6b';
+                        var categoryTranslated = translateText(c.category);
+                        var textTranslated = translateText(c.text);
+                        var lblStatus = currentLang === 'en' ? 'Status' : 'Status';
+                        var lblComplaint = currentLang === 'en' ? 'Complaint' : 'Şikayət';
+                        var displayStatus = currentLang === 'en' ? (c.status === 'açıq' ? 'OPEN' : (c.status === 'icrada' ? 'IN PROGRESS' : 'SOLVED')) : c.status;
+
+                        L.circleMarker([c.lat, c.lng], {
+                            radius: 9, 
+                            color: markerColor, 
+                            fillColor: markerColor, 
+                            fillOpacity: 0.8
+                        })
+                        .addTo(markersGroup)
+                        .bindPopup('<div style="color:black; font-family:sans-serif; font-size:12px;">' +
+                                        '<b style="color:#0055ff;">' + categoryTranslated + ' - P' + c.priority + '</b><br>' +
+                                        '<b>' + lblComplaint + ':</b> ' + textTranslated + '<br>' +
+                                        '<span style="color:gray;"><b>' + lblStatus + ':</b> ' + displayStatus + '</span>' +
+                                    '</div>');
+                    });
+                });
+        }
+        
+        window.onload = function() { loadMarkers(); };
+
+        map.on('click', function(e) {
+            document.getElementById('lat').value = e.latlng.lat.toFixed(4);
+            document.getElementById('lng').value = e.latlng.lng.toFixed(4);
+        });
+
+        async function sendComplaint() {
+            const text = document.getElementById('msgInput').value.trim();
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+            if(!text || !lat) return alert(languages[currentLang].alert_fields);
+            
+            try {
+                await fetch('/api/complaints', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text, lat: parseFloat(lat), lng: parseFloat(lng)})
+                });
+                alert(languages[currentLang].alert_success);
+                document.getElementById('msgInput').value = '';
+                loadMarkers();
+                if(document.getElementById('tab-list').classList.contains('active')) renderList();
+            } catch (error) { alert("Error."); }
+        }
+
+        async function sendChat(forcedText = null) {
+            const input = document.getElementById('chatInput');
+    const box = document.getElementById('chat-box');
+    const msgText = forcedText || input.value.trim();
+    if (!msgText) return;
+    
+    box.innerHTML += '<div class="msg user">' + msgText + '</div>';
+    if (!forcedText) input.value = '';
+    box.scrollTop = box.scrollHeight;
+    
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                message: msgText,
+                lang: currentLang // Aktiv dil seçimini backend-ə ötürürük!
+            })
+        });
+        const data = await res.json();
+        box.innerHTML += '<div class="msg agent">' + data.response + '</div>';
+    } catch (error) {
+        box.innerHTML += '<div class="msg agent" style="color: #ff6b6b;">' + languages[currentLang].error_chat + '</div>';
+    }
+    box.scrollTop = box.scrollHeight;
+        }
+
+        function askSuggested(text) { sendChat(text); }
+    </script>
+</body>
+</html>

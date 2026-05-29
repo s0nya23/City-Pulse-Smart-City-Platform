@@ -1,0 +1,90 @@
+[
+    {
+        "id": "m1",
+        "text": "Nizami küçəsindəki çalalar çox böyüyüb, maşınlar zədə alır",
+        "lat": 40.3989,
+        "lng": 49.8745,
+        "category": "Yol",
+        "priority": 4,
+        "department": "Yol Xidməti",
+        "status": "açıq",
+        "created_at": "2024-01-10T09:00:00"
+    },
+    {
+        "id": "m2",
+        "text": "28 May metrosunun yanındakı zibil qutuları 3 gündür boşaldılmayıb",
+        "lat": 40.3794,
+        "lng": 49.8512,
+        "category": "Sanitariya",
+        "priority": 3,
+        "department": "Kommunal Xidmət",
+        "status": "açıq",
+        "created_at": "2024-01-11T14:00:00"
+    },
+    {
+        "id": "m3",
+        "text": "İçəri Şəhər parkındakı fənərlər yanmır, gecə çox qaranlıqdır",
+        "lat": 40.366,
+        "lng": 49.837,
+        "category": "İşıqlandırma",
+        "priority": 3,
+        "department": "Elektrik Xidməti",
+        "status": "icrada",
+        "created_at": "2024-01-12T18:00:00"
+    },
+    {
+        "id": "m4",
+        "text": "Yasamal parkında su borusu partlayıb, su küçəyə axır",
+        "lat": 40.39,
+        "lng": 49.865,
+        "category": "Su Təchizatı",
+        "priority": 5,
+        "department": "Azərsu",
+        "status": "açıq",
+        "created_at": "2024-01-13T07:30:00"
+    },
+    {
+        "id": "m5",
+        "text": "Nərimanov rayonunda qaz kəsildi 2 saatdır",
+        "lat": 40.405,
+        "lng": 49.87,
+        "category": "Qaz",
+        "priority": 5,
+        "department": "Azərqaz",
+        "status": "həll edildi",
+        "created_at": "2024-01-09T11:00:00"
+    },
+    {
+        "id": "m6",
+        "text": "Biləcəri qovşağında tıxac əmələ gətirən yol işarəsi yıxılıb",
+        "lat": 40.42,
+        "lng": 49.81,
+        "category": "Yol",
+        "priority": 4,
+        "department": "Yol Xidməti",
+        "status": "açıq",
+        "created_at": "2024-01-13T08:00:00"
+    },
+    {
+        "id": "m7",
+        "text": "Xətai prospektindəki ağaclar budanmayıb, elektrik xətlərini əhatə edib",
+        "lat": 40.375,
+        "lng": 49.92,
+        "category": "Yaşıllaşdırma",
+        "priority": 3,
+        "department": "Yaşıllaşdırma İdarəsi",
+        "status": "açıq",
+        "created_at": "2024-01-12T10:00:00"
+    },
+    {
+        "id": "m8",
+        "text": "Sabunçu qəsəbəsində kanalizasiya daşıb, piyada yolu keçilməzdir",
+        "lat": 40.44,
+        "lng": 49.95,
+        "category": "Kanalizasiya",
+        "priority": 5,
+        "department": "Kommunal Xidmət",
+        "status": "açıq",
+        "created_at": "2024-01-13T06:00:00"
+    }
+]
